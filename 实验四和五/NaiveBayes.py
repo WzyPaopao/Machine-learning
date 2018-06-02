@@ -61,7 +61,7 @@ def pOfClass(data, size):
     return c, p
 
 def classifier(data, testData, size):
-    print '\n' + str(testData)
+    # print '\n' + str(testData)
     probability = np.ones(3, dtype=float)   # 预测概率数组
     condition = testData   # 目标条件数组
 
@@ -81,20 +81,20 @@ def classifier(data, testData, size):
     num_result, pResult = pOfClass(data, size)
 
     # P(条件 | 分类目标类型)
-    p_condition = np.zeros(4, dtype=float)
+    p_condition = np.zeros([3, 4], dtype=float)
     feature = 0.0
     for j in range(3):
         for i in range(0, 4):
             count = counter(i, condition[i], data, size, feature)
-            p_condition[i] = count / num_result[j] * 1.0
-            print '-----' + str(count) + '--' +  str(num_result[j])
+            p_condition[j][i] = count / num_result[j] * 1.0
+            # print '-----' + str(count) + '--' +  str(num_result[j])
         feature = feature + 0.5
-    print '=====' + str(p_condition)
+    # print '=====' + str(p_condition)
 
     #各种情况的概率
     for q in range(3):
         for j in range(0, 4):
-            probability[q] = probability[q] * p_condition[j]
+            probability[q] = probability[q] * p_condition[q][j]
         probability[q] = probability[q] * pResult[q] / (temp / size + 0.0000001)   # 分母加0.0000001来避免分母为零
 
     pred = 0
@@ -112,6 +112,12 @@ if __name__ == '__main__':
     sourceData, size = openFile('lenses.txt')
     data = turnTheMatrix(sourceData, size)
     #print data
+    prediction = np.zeros(size, dtype=float)
+    temp = 0.0
     for i in range(size):
-        prediction = classifier(data, data[i], size)
-        print str(prediction) + ' --- ' + str(data[i][4])
+        prediction[i] = classifier(data, data[i], size)
+        if prediction[i] == data[i][4]:
+            temp = temp + 1
+    print 'prediction:\n' + str(prediction)
+    print 'class:\n' + str(data[:, 4])
+    print 'the precision: ' + str(round(temp / size * 100, 2)) + '%'
